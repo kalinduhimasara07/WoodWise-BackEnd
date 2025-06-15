@@ -1,47 +1,57 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const Furniture = require('../models/Furniture');
 const path = require('path');
 const fs = require('fs');
+const Furniture = require('../models/Furniture');
 
-const uploadDir = 'uploads/furniture-images';
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// Create directories if not exists
+const imageDir = 'uploads/furniture-images';
+const modelDir = path.join(__dirname, '../../WoodWise-frontend/public/models');
 
+if (!fs.existsSync(imageDir)) fs.mkdirSync(imageDir, { recursive: true });
+if (!fs.existsSync(modelDir)) fs.mkdirSync(modelDir, { recursive: true });
+
+// Dynamic storage handler
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/furniture-images');
+  destination: (req, file, cb) => {
+    if (file.fieldname === 'images') {
+      cb(null, imageDir);
+    } else if (file.fieldname === 'models') {
+      cb(null, modelDir);
+    } else {
+      cb(new Error('Invalid field name'), null);
+    }
   },
-  filename: function (req, file, cb) {
+  filename: (req, file, cb) => {
     const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
     cb(null, uniqueName);
-  },
-});
-
-const upload = multer({ 
-  storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10 MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|gif|webp/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-    
-    if (mimetype && extname) {
-      return cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed'));
-    }
   }
 });
 
-// @route   POST /api/furniture/add-furniture
-// @desc    Create a new furniture item
-// @access  Public
-router.post('/add-furniture', upload.array('images', 10), async (req, res) => {
+const fileFilter = (req, file, cb) => {
+  const ext = path.extname(file.originalname).toLowerCase();
+  const imageTypes = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+  const modelTypes = ['.glb'];
+
+  if (imageTypes.includes(ext) || modelTypes.includes(ext)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image and .glb files are allowed'));
+  }
+};
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 20 * 1024 * 1024 } // 20MB
+}).fields([
+  { name: 'images', maxCount: 10 },
+  { name: 'models', maxCount: 5 }
+]);
+
+// Route to handle adding furniture
+router.post('/add-furniture', upload, async (req, res) => {
   try {
     const {
       name,
@@ -63,33 +73,21 @@ router.post('/add-furniture', upload.array('images', 10), async (req, res) => {
     } = req.body;
 
     if (!name || !category || !price || !description || !woodType || !stock || !sku) {
-      return res.status(400).json({
-        success: false,
-        message: 'Required fields are missing'
-      });
+      return res.status(400).json({ success: false, message: 'Required fields are missing' });
     }
 
-    let parsedDimensions = {};
-    if (dimensions) {
-      try {
-        parsedDimensions = typeof dimensions === 'string' ? JSON.parse(dimensions) : dimensions;
-      } catch (error) {
-        console.error('Error parsing dimensions:', error);
-        parsedDimensions = {};
-      }
-    }
+    const parsedDimensions = dimensions ? JSON.parse(dimensions) : {};
+    const parsedTags = tags ? JSON.parse(tags) : [];
 
-    let parsedTags = [];
-    if (tags) {
-      try {
-        parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
-      } catch (error) {
-        console.error('Error parsing tags:', error);
-        parsedTags = [];
-      }
-    }
+    const imageData = req.files.images ? req.files.images.map(file => ({
+      filename: file.filename,
+      originalName: file.originalname,
+      path: file.path,
+      size: file.size,
+      mimetype: file.mimetype
+    })) : [];
 
-    const imageData = req.files ? req.files.map(file => ({
+    const modelData = req.files.models ? req.files.models.map(file => ({
       filename: file.filename,
       originalName: file.originalname,
       path: file.path,
@@ -113,12 +111,13 @@ router.post('/add-furniture', upload.array('images', 10), async (req, res) => {
       sku: sku.trim(),
       tags: parsedTags,
       images: imageData,
+      models: modelData,
       inStock: inStock === 'true' || inStock === true,
       featured: featured === 'true' || featured === true
     });
 
     const savedFurniture = await furniture.save();
-    
+
     res.status(201).json({
       success: true,
       message: 'Furniture item created successfully',
@@ -126,27 +125,8 @@ router.post('/add-furniture', upload.array('images', 10), async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error creating furniture:', error);
-    
-    if (req.files) {
-      req.files.forEach(file => {
-        fs.unlink(file.path, (err) => {
-          if (err) console.error('Error deleting file:', err);
-        });
-      });
-    }
-
-    if (error.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        message: 'SKU already exists'
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Internal server error'
-    });
+    console.error('Furniture creation error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Internal server error' });
   }
 });
 
@@ -155,17 +135,17 @@ router.post('/add-furniture', upload.array('images', 10), async (req, res) => {
 // @access  Public
 router.get('/', async (req, res) => {
   try {
-    const { 
-      page = 1, 
-      limit = 10, 
-      category, 
+    const {
+      page = 1,
+      limit = 10,
+      category,
       subcategory,
       woodType,
-      inStock, 
+      inStock,
       featured,
-      search 
+      search
     } = req.query;
-    
+
     const query = {};
     if (category) query.category = category;
     if (subcategory) query.subcategory = subcategory;
@@ -212,7 +192,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const furniture = await Furniture.findById(req.params.id);
-    
+
     if (!furniture) {
       return res.status(404).json({
         success: false,
@@ -236,97 +216,97 @@ router.get('/:id', async (req, res) => {
 // @route   PUT /api/furniture/:id
 // @desc    Update furniture item
 // @access  Public
-router.put('/:id', upload.array('images', 10), async (req, res) => {
-  try {
-    const furniture = await Furniture.findById(req.params.id);
-    
-    if (!furniture) {
-      return res.status(404).json({
-        success: false,
-        message: 'Furniture item not found'
-      });
-    }
+// router.put('/:id', upload.array('images', 10), async (req, res) => {
+//   try {
+//     const furniture = await Furniture.findById(req.params.id);
 
-    let parsedDimensions = req.body.dimensions;
-    if (typeof parsedDimensions === 'string') {
-      try {
-        parsedDimensions = JSON.parse(parsedDimensions);
-      } catch (error) {
-        console.error('Error parsing dimensions:', error);
-        parsedDimensions = furniture.dimensions;
-      }
-    }
+//     if (!furniture) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Furniture item not found'
+//       });
+//     }
 
-    let parsedTags = req.body.tags;
-    if (typeof parsedTags === 'string') {
-      try {
-        parsedTags = JSON.parse(parsedTags);
-      } catch (error) {
-        console.error('Error parsing tags:', error);
-        parsedTags = furniture.tags;
-      }
-    }
+//     let parsedDimensions = req.body.dimensions;
+//     if (typeof parsedDimensions === 'string') {
+//       try {
+//         parsedDimensions = JSON.parse(parsedDimensions);
+//       } catch (error) {
+//         console.error('Error parsing dimensions:', error);
+//         parsedDimensions = furniture.dimensions;
+//       }
+//     }
 
-    const newImages = req.files ? req.files.map(file => ({
-      filename: file.filename,
-      originalName: file.originalname,
-      path: file.path,
-      size: file.size,
-      mimetype: file.mimetype
-    })) : [];
+//     let parsedTags = req.body.tags;
+//     if (typeof parsedTags === 'string') {
+//       try {
+//         parsedTags = JSON.parse(parsedTags);
+//       } catch (error) {
+//         console.error('Error parsing tags:', error);
+//         parsedTags = furniture.tags;
+//       }
+//     }
 
-    const updateData = {
-      name: req.body.name ? req.body.name.trim() : furniture.name,
-      category: req.body.category || furniture.category,
-      subcategory: req.body.subcategory !== undefined ? req.body.subcategory : furniture.subcategory,
-      description: req.body.description ? req.body.description.trim() : furniture.description,
-      woodType: req.body.woodType || furniture.woodType,
-      dimensions: parsedDimensions || furniture.dimensions,
-      tags: parsedTags || furniture.tags,
-      price: req.body.price ? parseFloat(req.body.price) : furniture.price,
-      salePrice: req.body.salePrice !== undefined ? (req.body.salePrice ? parseFloat(req.body.salePrice) : null) : furniture.salePrice,
-      stock: req.body.stock !== undefined ? parseInt(req.body.stock) : furniture.stock,
-      weight: req.body.weight !== undefined ? (req.body.weight ? parseFloat(req.weight) : null) : furniture.weight,
-      color: req.body.color !== undefined ? req.body.color : furniture.color,
-      brand: req.body.brand !== undefined ? req.body.brand : furniture.brand,
-      sku: req.body.sku ? req.body.sku.trim() : furniture.sku,
-      inStock: req.body.inStock !== undefined ? (req.body.inStock === 'true' || req.body.inStock === true) : furniture.inStock,
-      featured: req.body.featured !== undefined ? (req.body.featured === 'true' || req.body.featured === true) : furniture.featured
-    };
+//     const newImages = req.files ? req.files.map(file => ({
+//       filename: file.filename,
+//       originalName: file.originalname,
+//       path: file.path,
+//       size: file.size,
+//       mimetype: file.mimetype
+//     })) : [];
 
-    if (newImages.length > 0) {
-      updateData.images = [...furniture.images, ...newImages];
-    }
+//     const updateData = {
+//       name: req.body.name ? req.body.name.trim() : furniture.name,
+//       category: req.body.category || furniture.category,
+//       subcategory: req.body.subcategory !== undefined ? req.body.subcategory : furniture.subcategory,
+//       description: req.body.description ? req.body.description.trim() : furniture.description,
+//       woodType: req.body.woodType || furniture.woodType,
+//       dimensions: parsedDimensions || furniture.dimensions,
+//       tags: parsedTags || furniture.tags,
+//       price: req.body.price ? parseFloat(req.body.price) : furniture.price,
+//       salePrice: req.body.salePrice !== undefined ? (req.body.salePrice ? parseFloat(req.body.salePrice) : null) : furniture.salePrice,
+//       stock: req.body.stock !== undefined ? parseInt(req.body.stock) : furniture.stock,
+//       weight: req.body.weight !== undefined ? (req.body.weight ? parseFloat(req.weight) : null) : furniture.weight,
+//       color: req.body.color !== undefined ? req.body.color : furniture.color,
+//       brand: req.body.brand !== undefined ? req.body.brand : furniture.brand,
+//       sku: req.body.sku ? req.body.sku.trim() : furniture.sku,
+//       inStock: req.body.inStock !== undefined ? (req.body.inStock === 'true' || req.body.inStock === true) : furniture.inStock,
+//       featured: req.body.featured !== undefined ? (req.body.featured === 'true' || req.body.featured === true) : furniture.featured
+//     };
 
-    const updatedFurniture = await Furniture.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true, runValidators: true }
-    );
+//     if (newImages.length > 0) {
+//       updateData.images = [...furniture.images, ...newImages];
+//     }
 
-    res.json({
-      success: true,
-      message: 'Furniture item updated successfully',
-      data: updatedFurniture
-    });
+//     const updatedFurniture = await Furniture.findByIdAndUpdate(
+//       req.params.id,
+//       updateData,
+//       { new: true, runValidators: true }
+//     );
 
-  } catch (error) {
-    console.error('Error updating furniture:', error);
-    
-    if (req.files) {
-      req.files.forEach(file => {
-        fs.unlink(file.path, (err) => {
-          if (err) console.error('Error deleting file:', err);
-        });
-      });
-    }
-    
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
-});
+//     res.json({
+//       success: true,
+//       message: 'Furniture item updated successfully',
+//       data: updatedFurniture
+//     });
+
+//   } catch (error) {
+//     console.error('Error updating furniture:', error);
+
+//     if (req.files) {
+//       req.files.forEach(file => {
+//         fs.unlink(file.path, (err) => {
+//           if (err) console.error('Error deleting file:', err);
+//         });
+//       });
+//     }
+
+//     res.status(500).json({
+//       success: false,
+//       message: error.message
+//     });
+//   }
+// });
 
 // @route   DELETE /api/furniture/:id
 // @desc    Delete furniture item
@@ -334,7 +314,7 @@ router.put('/:id', upload.array('images', 10), async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const furniture = await Furniture.findById(req.params.id);
-    
+
     if (!furniture) {
       return res.status(404).json({
         success: false,
@@ -372,7 +352,7 @@ router.delete('/:id', async (req, res) => {
 router.get('/images/:filename', (req, res) => {
   const filename = req.params.filename;
   const imagePath = path.join(__dirname, '../uploads/furniture-images', filename);
-  
+
   if (fs.existsSync(imagePath)) {
     res.sendFile(path.resolve(imagePath));
   } else {
@@ -389,7 +369,7 @@ router.get('/images/:filename', (req, res) => {
 router.delete('/:id/images/:filename', async (req, res) => {
   try {
     const furniture = await Furniture.findById(req.params.id);
-    
+
     if (!furniture) {
       return res.status(404).json({
         success: false,
@@ -398,7 +378,7 @@ router.delete('/:id/images/:filename', async (req, res) => {
     }
 
     const filename = req.params.filename;
-    
+
     furniture.images = furniture.images.filter(img => img.filename !== filename);
     await furniture.save();
 

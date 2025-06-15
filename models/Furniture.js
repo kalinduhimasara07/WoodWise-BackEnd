@@ -74,6 +74,16 @@ const furnitureSchema = new mongoose.Schema({
       default: Date.now
     }
   }],
+  models: [{
+    filename: String,
+    originalName: String,
+    path: String,
+    size: Number,
+    uploadDate: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   inStock: {
     type: Boolean,
     default: true
