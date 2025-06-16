@@ -216,97 +216,120 @@ router.get('/:id', async (req, res) => {
 // @route   PUT /api/furniture/:id
 // @desc    Update furniture item
 // @access  Public
-// router.put('/:id', upload.array('images', 10), async (req, res) => {
-//   try {
-//     const furniture = await Furniture.findById(req.params.id);
+router.put('/:id', upload, async (req, res) => {
+  try {
+    const furniture = await Furniture.findById(req.params.id);
+    if (!furniture) {
+      return res.status(404).json({
+        success: false,
+        message: 'Furniture item not found'
+      });
+    }
 
-//     if (!furniture) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Furniture item not found'
-//       });
-//     }
+    // Parse dimensions
+    let parsedDimensions = req.body.dimensions;
+    if (typeof parsedDimensions === 'string') {
+      try {
+        parsedDimensions = JSON.parse(parsedDimensions);
+      } catch (error) {
+        console.error('Error parsing dimensions:', error);
+        parsedDimensions = furniture.dimensions;
+      }
+    }
 
-//     let parsedDimensions = req.body.dimensions;
-//     if (typeof parsedDimensions === 'string') {
-//       try {
-//         parsedDimensions = JSON.parse(parsedDimensions);
-//       } catch (error) {
-//         console.error('Error parsing dimensions:', error);
-//         parsedDimensions = furniture.dimensions;
-//       }
-//     }
+    // Parse tags
+    let parsedTags = req.body.tags;
+    if (typeof parsedTags === 'string') {
+      try {
+        parsedTags = JSON.parse(parsedTags);
+      } catch (error) {
+        console.error('Error parsing tags:', error);
+        parsedTags = furniture.tags;
+      }
+    }
 
-//     let parsedTags = req.body.tags;
-//     if (typeof parsedTags === 'string') {
-//       try {
-//         parsedTags = JSON.parse(parsedTags);
-//       } catch (error) {
-//         console.error('Error parsing tags:', error);
-//         parsedTags = furniture.tags;
-//       }
-//     }
+    // Images and Models from req.files (from .fields())
+    const newImages = req.files?.images?.map(file => ({
+      filename: file.filename,
+      originalName: file.originalname,
+      path: file.path,
+      size: file.size,
+      mimetype: file.mimetype
+    })) || [];
 
-//     const newImages = req.files ? req.files.map(file => ({
-//       filename: file.filename,
-//       originalName: file.originalname,
-//       path: file.path,
-//       size: file.size,
-//       mimetype: file.mimetype
-//     })) : [];
+    const newModels = req.files?.models?.map(file => ({
+      filename: file.filename,
+      originalName: file.originalname,
+      path: file.path,
+      size: file.size,
+      mimetype: file.mimetype
+    })) || [];
 
-//     const updateData = {
-//       name: req.body.name ? req.body.name.trim() : furniture.name,
-//       category: req.body.category || furniture.category,
-//       subcategory: req.body.subcategory !== undefined ? req.body.subcategory : furniture.subcategory,
-//       description: req.body.description ? req.body.description.trim() : furniture.description,
-//       woodType: req.body.woodType || furniture.woodType,
-//       dimensions: parsedDimensions || furniture.dimensions,
-//       tags: parsedTags || furniture.tags,
-//       price: req.body.price ? parseFloat(req.body.price) : furniture.price,
-//       salePrice: req.body.salePrice !== undefined ? (req.body.salePrice ? parseFloat(req.body.salePrice) : null) : furniture.salePrice,
-//       stock: req.body.stock !== undefined ? parseInt(req.body.stock) : furniture.stock,
-//       weight: req.body.weight !== undefined ? (req.body.weight ? parseFloat(req.weight) : null) : furniture.weight,
-//       color: req.body.color !== undefined ? req.body.color : furniture.color,
-//       brand: req.body.brand !== undefined ? req.body.brand : furniture.brand,
-//       sku: req.body.sku ? req.body.sku.trim() : furniture.sku,
-//       inStock: req.body.inStock !== undefined ? (req.body.inStock === 'true' || req.body.inStock === true) : furniture.inStock,
-//       featured: req.body.featured !== undefined ? (req.body.featured === 'true' || req.body.featured === true) : furniture.featured
-//     };
+    const updateData = {
+      name: req.body.name ? req.body.name.trim() : furniture.name,
+      category: req.body.category || furniture.category,
+      subcategory: req.body.subcategory ?? furniture.subcategory,
+      description: req.body.description ? req.body.description.trim() : furniture.description,
+      woodType: req.body.woodType || furniture.woodType,
+      dimensions: parsedDimensions || furniture.dimensions,
+      tags: parsedTags || furniture.tags,
+      price: req.body.price ? parseFloat(req.body.price) : furniture.price,
+      salePrice: req.body.salePrice !== undefined
+        ? (req.body.salePrice ? parseFloat(req.body.salePrice) : null)
+        : furniture.salePrice,
+      stock: req.body.stock !== undefined ? parseInt(req.body.stock) : furniture.stock,
+      weight: req.body.weight !== undefined
+        ? (req.body.weight ? parseFloat(req.body.weight) : null)
+        : furniture.weight,
+      color: req.body.color ?? furniture.color,
+      brand: req.body.brand ?? furniture.brand,
+      sku: req.body.sku ? req.body.sku.trim() : furniture.sku,
+      inStock: req.body.inStock !== undefined
+        ? (req.body.inStock === 'true' || req.body.inStock === true)
+        : furniture.inStock,
+      featured: req.body.featured !== undefined
+        ? (req.body.featured === 'true' || req.body.featured === true)
+        : furniture.featured
+    };
 
-//     if (newImages.length > 0) {
-//       updateData.images = [...furniture.images, ...newImages];
-//     }
+    if (newImages.length > 0) {
+      updateData.images = [...(furniture.images || []), ...newImages];
+    }
 
-//     const updatedFurniture = await Furniture.findByIdAndUpdate(
-//       req.params.id,
-//       updateData,
-//       { new: true, runValidators: true }
-//     );
+    if (newModels.length > 0) {
+      updateData.models = [...(furniture.models || []), ...newModels];
+    }
 
-//     res.json({
-//       success: true,
-//       message: 'Furniture item updated successfully',
-//       data: updatedFurniture
-//     });
+    const updatedFurniture = await Furniture.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
 
-//   } catch (error) {
-//     console.error('Error updating furniture:', error);
+    res.json({
+      success: true,
+      message: 'Furniture item updated successfully',
+      data: updatedFurniture
+    });
 
-//     if (req.files) {
-//       req.files.forEach(file => {
-//         fs.unlink(file.path, (err) => {
-//           if (err) console.error('Error deleting file:', err);
-//         });
-//       });
-//     }
+  } catch (error) {
+    console.error('Error updating furniture:', error);
 
-//     res.status(500).json({
-//       success: false,
-//       message: error.message
-//     });
-//   }
-// });
+    // Delete any uploaded files if error occurs
+    if (req.files) {
+      Object.values(req.files).flat().forEach(file => {
+        fs.unlink(file.path, err => {
+          if (err) console.error('Error deleting file:', err);
+        });
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
 
 // @route   DELETE /api/furniture/:id
 // @desc    Delete furniture item
