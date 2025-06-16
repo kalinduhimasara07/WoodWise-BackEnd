@@ -9,10 +9,10 @@ mongoose.connect(process.env.MONGODB_URI, {
   }}).then(() => {
   console.log('MongoDB connected');
 
-  const newUser = new User({
-    username: 'testuser3',
-    password: 'testpassword3',
-    email: 'testuser3@gmail.com',
+  const newUser = new User({ // Example user creation 
+    username: 'owner',     
+    password: '12345',
+    email: 'owner@gmail.com',
     role: 'owner',
   });
 
