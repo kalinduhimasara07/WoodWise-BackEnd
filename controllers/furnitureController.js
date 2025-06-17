@@ -4,56 +4,66 @@ import multer from "multer";
 import fs from "fs";
 import Furniture from "../models/furniture.js";
 
+//fsdfadsfadsvfa/
+//fasfassa
+
 //handle adding furniture
 export async function addFurniture(req, res) {
   try {
-    console.log("Request Body:", req.body);  // For debugging purposes
-    console.log("Files:", req.files);  // Check the files uploaded
-    console.log("Images:", req.body.images);  // Check if images array is being received
+    console.log("Request Body:", req.body); // For debugging purposes
+    console.log("Files:", req.files); // Check the files uploaded
 
-    const { 
-      name, 
-      category, 
-      subcategory, 
-      price, 
-      salePrice, 
-      description, 
-      woodType, 
-      dimensions, 
-      weight, 
-      color, 
-      brand, 
-      stock, 
-      sku, 
-      tags, 
-      inStock, 
-      featured 
+    const {
+      name,
+      category,
+      subcategory,
+      price,
+      salePrice,
+      description,
+      woodType,
+      dimensions,
+      weight,
+      color,
+      brand,
+      stock,
+      sku,
+      tags,
+      inStock,
+      featured,
     } = req.body;
 
-    if (!name || !category || !price || !description || !woodType || !stock || !sku) {
-      return res.status(400).json({ success: false, message: "Required fields are missing" });
+    if (
+      !name ||
+      !category ||
+      !price ||
+      !description ||
+      !woodType ||
+      !stock ||
+      !sku
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Required fields are missing" });
     }
 
     const parsedDimensions = dimensions ? JSON.parse(dimensions) : {};
     const parsedTags = tags ? JSON.parse(tags) : [];
 
-    // If images is a string, make it an array of URLs
-    const imageData = Array.isArray(req.body.images) 
-      ? req.body.images.map((url) => ({ url }))  // Directly store the URL if it's an array
-      : req.body.images 
-      ? [{ url: req.body.images }]  // If it's a string, wrap it in an array
+    // Handle images - Ensure images is an array before processing
+    const imageData = Array.isArray(req.body.images)
+      ? req.body.images.map((url) => ({ url })) // Directly store the URL if it's an array
+      : req.body.images
+      ? [{ url: req.body.images }] // If it's a string, wrap it in an array
       : [];
 
-    const modelData = req.files.models
-      ? req.files.models.map((file) => ({
-          filename: file.filename,
-          originalName: file.originalname,
-          path: file.path, // Save the model file locally
-          size: file.size,
-          mimetype: file.mimetype,
-        }))
-      : [];
+    // Handle models - Ensure it's an array before processing
+    const modelData = req.body.models
+      ? Array.isArray(req.body.models) // Check if it's already an array
+        ? req.body.models.map((url) => ({ url })) // Directly map if it's an array
+        : [{ url: req.body.models }] // If it's a string, wrap it in an array
+      : []; // If there's no models field, set it to an empty array
 
+    // Create the new furniture item
     const furniture = new Furniture({
       name: name.trim(),
       category,
@@ -69,12 +79,13 @@ export async function addFurniture(req, res) {
       stock: parseInt(stock),
       sku: sku.trim(),
       tags: parsedTags,
-      images: imageData,  // Saving the image URLs now
-      models: modelData,  // Saving the model files locally
+      images: imageData, // Saving image URLs
+      models: modelData, // Saving model URLs
       inStock: inStock === "true" || inStock === true,
       featured: featured === "true" || featured === true,
     });
 
+    // Save the furniture item in the database
     const savedFurniture = await furniture.save();
 
     res.status(201).json({
@@ -90,8 +101,6 @@ export async function addFurniture(req, res) {
     });
   }
 }
-
-
 
 // @route   GET /api/furniture
 // @desc    Get all furniture items

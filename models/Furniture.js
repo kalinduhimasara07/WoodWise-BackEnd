@@ -96,9 +96,7 @@ const furnitureSchema = new mongoose.Schema({
   ],
   models: [
     {
-      filename: String,
-      originalName: String,
-      path: String,
+      url: String, // The URL of the image (Supabase public URL)
       size: Number,
       uploadDate: {
         type: Date,
@@ -136,4 +134,3 @@ furnitureSchema.index({ name: "text", description: "text" });
 const Furniture = mongoose.model("Furniture", furnitureSchema);
 
 export default Furniture;
-
