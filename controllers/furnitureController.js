@@ -4,65 +4,53 @@ import multer from "multer";
 import fs from "fs";
 import Furniture from "../models/furniture.js";
 
-
-
 //handle adding furniture
 export async function addFurniture(req, res) {
   try {
     console.log("Request Body:", req.body);  // For debugging purposes
     console.log("Files:", req.files);  // Check the files uploaded
+    console.log("Images:", req.body.images);  // Check if images array is being received
 
-    const {
-      name,
-      category,
-      subcategory,
-      price,
-      salePrice,
-      description,
-      woodType,
-      dimensions,
-      weight,
-      color,
-      brand,
-      stock,
-      sku,
-      tags,
-      inStock,
-      featured,
+    const { 
+      name, 
+      category, 
+      subcategory, 
+      price, 
+      salePrice, 
+      description, 
+      woodType, 
+      dimensions, 
+      weight, 
+      color, 
+      brand, 
+      stock, 
+      sku, 
+      tags, 
+      inStock, 
+      featured 
     } = req.body;
 
-    if (
-      !name ||
-      !category ||
-      !price ||
-      !description ||
-      !woodType ||
-      !stock ||
-      !sku
-    ) {
+    if (!name || !category || !price || !description || !woodType || !stock || !sku) {
       return res.status(400).json({ success: false, message: "Required fields are missing" });
     }
 
     const parsedDimensions = dimensions ? JSON.parse(dimensions) : {};
     const parsedTags = tags ? JSON.parse(tags) : [];
 
-    // Handling images: Images are now being uploaded via multer
-    const imageData = req.files.images
-      ? req.files.images.map((file) => ({
-          filename: file.filename,
-          originalName: file.originalname,
-          url: `/uploads/furniture-images/${file.filename}`,  // Store the file URL for serving later
-          size: file.size,
-        }))
+    // If images is a string, make it an array of URLs
+    const imageData = Array.isArray(req.body.images) 
+      ? req.body.images.map((url) => ({ url }))  // Directly store the URL if it's an array
+      : req.body.images 
+      ? [{ url: req.body.images }]  // If it's a string, wrap it in an array
       : [];
 
-    // Handling models (if uploaded)
     const modelData = req.files.models
       ? req.files.models.map((file) => ({
           filename: file.filename,
           originalName: file.originalname,
-          url: `/uploads/furniture-models/${file.filename}`,  // Store the file URL for models
+          path: file.path, // Save the model file locally
           size: file.size,
+          mimetype: file.mimetype,
         }))
       : [];
 
@@ -81,8 +69,8 @@ export async function addFurniture(req, res) {
       stock: parseInt(stock),
       sku: sku.trim(),
       tags: parsedTags,
-      images: imageData,  // Save image URLs (public URL)
-      models: modelData,  // Save model URLs
+      images: imageData,  // Saving the image URLs now
+      models: modelData,  // Saving the model files locally
       inStock: inStock === "true" || inStock === true,
       featured: featured === "true" || featured === true,
     });

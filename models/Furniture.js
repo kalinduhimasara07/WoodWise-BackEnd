@@ -86,8 +86,6 @@ const furnitureSchema = new mongoose.Schema({
   ],
   images: [
     {
-      filename: String,
-      originalName: String,
       url: String, // The URL of the image (Supabase public URL)
       size: Number,
       uploadDate: {
@@ -139,4 +137,3 @@ const Furniture = mongoose.model("Furniture", furnitureSchema);
 
 export default Furniture;
 
-// module.exports = mongoose.model("Furniture", furnitureSchema);
