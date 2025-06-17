@@ -4,61 +4,14 @@ import multer from "multer";
 import fs from "fs";
 import Furniture from "../models/furniture.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
-// Create directories if not exists
-const imageDir = "uploads/furniture-images";
-const modelDir = path.join(__dirname, "../../woodwise-frontend/public/models");
-
-if (!fs.existsSync(imageDir)) fs.mkdirSync(imageDir, { recursive: true });
-if (!fs.existsSync(modelDir)) fs.mkdirSync(modelDir, { recursive: true });
-
-// Dynamic storage handler
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    if (file.fieldname === "images") {
-      cb(null, imageDir);
-    } else if (file.fieldname === "models") {
-      cb(null, modelDir);
-    } else {
-      cb(new Error("Invalid field name"), null);
-    }
-  },
-  filename: (req, file, cb) => {
-    const uniqueName =
-      Date.now() +
-      "-" +
-      Math.round(Math.random() * 1e9) +
-      path.extname(file.originalname);
-    cb(null, uniqueName);
-  },
-});
-
-const fileFilter = (req, file, cb) => {
-  const ext = path.extname(file.originalname).toLowerCase();
-  const imageTypes = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
-  const modelTypes = [".glb"];
-
-  if (imageTypes.includes(ext) || modelTypes.includes(ext)) {
-    cb(null, true);
-  } else {
-    cb(new Error("Only image and .glb files are allowed"));
-  }
-};
-
-const upload = multer({
-  storage,
-  fileFilter,
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
-}).fields([
-  { name: "images", maxCount: 10 },
-  { name: "models", maxCount: 5 },
-]);
 
 //handle adding furniture
 export async function addFurniture(req, res) {
   try {
+    console.log("Request Body:", req.body);  // For debugging purposes
+    console.log("Files:", req.files);  // Check the files uploaded
+
     const {
       name,
       category,
@@ -87,31 +40,29 @@ export async function addFurniture(req, res) {
       !stock ||
       !sku
     ) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Required fields are missing" });
+      return res.status(400).json({ success: false, message: "Required fields are missing" });
     }
 
     const parsedDimensions = dimensions ? JSON.parse(dimensions) : {};
     const parsedTags = tags ? JSON.parse(tags) : [];
 
+    // Handling images: Images are now being uploaded via multer
     const imageData = req.files.images
       ? req.files.images.map((file) => ({
           filename: file.filename,
           originalName: file.originalname,
-          path: file.path,
+          url: `/uploads/furniture-images/${file.filename}`,  // Store the file URL for serving later
           size: file.size,
-          mimetype: file.mimetype,
         }))
       : [];
 
+    // Handling models (if uploaded)
     const modelData = req.files.models
       ? req.files.models.map((file) => ({
           filename: file.filename,
           originalName: file.originalname,
-          path: file.path,
+          url: `/uploads/furniture-models/${file.filename}`,  // Store the file URL for models
           size: file.size,
-          mimetype: file.mimetype,
         }))
       : [];
 
@@ -130,8 +81,8 @@ export async function addFurniture(req, res) {
       stock: parseInt(stock),
       sku: sku.trim(),
       tags: parsedTags,
-      images: imageData,
-      models: modelData,
+      images: imageData,  // Save image URLs (public URL)
+      models: modelData,  // Save model URLs
       inStock: inStock === "true" || inStock === true,
       featured: featured === "true" || featured === true,
     });
@@ -151,6 +102,8 @@ export async function addFurniture(req, res) {
     });
   }
 }
+
+
 
 // @route   GET /api/furniture
 // @desc    Get all furniture items

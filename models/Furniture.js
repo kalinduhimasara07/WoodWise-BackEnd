@@ -88,7 +88,7 @@ const furnitureSchema = new mongoose.Schema({
     {
       filename: String,
       originalName: String,
-      path: String,
+      url: String, // The URL of the image (Supabase public URL)
       size: Number,
       uploadDate: {
         type: Date,

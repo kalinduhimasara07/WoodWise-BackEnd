@@ -11,7 +11,9 @@ import {
 
 const furnitureRouter = express.Router();
 
-furnitureRouter.post("/add-furniture", addFurniture);
+// Add the route to add furniture and apply multer middleware
+furnitureRouter.post("/add-furniture", addFurniture);  // Multer middleware is already applied in index.js
+
 furnitureRouter.get("/", getAllFurniture);
 furnitureRouter.get("/:id", getFurnitureById);
 furnitureRouter.put("/:id", updateFurniture);
