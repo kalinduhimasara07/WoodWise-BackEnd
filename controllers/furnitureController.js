@@ -160,7 +160,7 @@ export async function getAllFurniture(req, res) {
 
 export async function getFurnitureById(req, res) {
   try {
-    const furniture = await Furniture.findById(req.params.id);
+    const furniture = await Furniture.findOne({ sku: req.params.id });
 
     if (!furniture) {
       return res.status(404).json({
