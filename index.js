@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 import multer from "multer";
 import path from "path";  // Import path module
 import fs from "fs";      // Ensure fs is also imported
+import timberRouter from "./routes/timberRouter.js";
 
 dotenv.config();
 
@@ -85,6 +86,8 @@ app.use("/api/auth", userRouter);
 app.post("/api/furniture/add-furniture", upload, furnitureRouter);  // Apply multer here
 
 app.use("/api/furniture", furnitureRouter);
+
+app.use("/api/timber", timberRouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
