@@ -80,3 +80,14 @@ export async function getAllUsers(req, res) {
     res.status(500).json({ message: "Server error" });
   }
 }
+
+export async function deleteUser(req, res) {
+  try {
+    const { id } = req.params;
+    await User.findByIdAndDelete(id);
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
