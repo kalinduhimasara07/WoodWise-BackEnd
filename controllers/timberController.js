@@ -104,3 +104,37 @@ export async function updateTimber(req, res) {
     });
   }
 }
+
+
+export async function deleteTimber(req, res) {
+  try {
+    const timberId = req.params.id; // Get the timber ID from the request parameters
+
+    // Find the timber item by its ID
+    const timber = await Timber.findById(timberId);
+
+    // If the timber item does not exist, return a 404 error
+    if (!timber) {
+      return res.status(404).json({
+        success: false,
+        message: "Timber item not found",
+      });
+    }
+
+    // Delete the timber item
+    await Timber.findByIdAndDelete(timberId);
+
+    // Return a success response
+    res.json({
+      success: true,
+      message: "Timber item deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting timber:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+
