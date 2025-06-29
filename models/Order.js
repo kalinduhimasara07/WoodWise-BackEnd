@@ -9,60 +9,76 @@ const orderSchema = new mongoose.Schema({
   furnitureItems: [
     {
       sku: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Furniture',
+        type: String,
         required: true,
       },
       quantity: {
         type: Number,
         required: true,
-        min: 1
+        min: 1,
       },
       unitPrice: {
         type: Number,
-        required: true
-      }
-    }
+        required: true,
+      },
+      note: {
+        type: String,
+        default: "No additional notes",
+      },
+    },
   ],
   totalAmount: {
     type: Number,
-    required: true
+    required: true,
+  },
+  advanceAmount: {
+    type: Number,
+    required: true,
   },
   customerInfo: {
     name: { type: String, required: true },
-    contactNumber: { type: String },
-    address: { type: String }
+    contactNumber: { type: String, required: true },
+    email: { type: String, required: true },
+    address: { type: String, required: true },
   },
   orderedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // store staff
-    required: true
+    type: String,
+    default: "Store Manager",
   },
   status: {
     type: String,
-    enum: ['Pending', 'In Production', 'Ready for Delivery', 'Completed', 'Cancelled'],
-    default: 'Pending'
+    enum: [
+      "Pending",
+      "In Production",
+      "Ready for Delivery",
+      "Completed",
+      "Cancelled",
+    ],
+    default: "Pending",
   },
   millWorker: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // mill worker who handles the order
+    type: String,
+    default: "Not Assigned",
   },
   notes: {
-    type: String
+    type: String,
+    default: "No additional notes",
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-orderSchema.pre('save', function (next) {
+orderSchema.pre("save", function (next) {
   this.updatedAt = Date.now();
   next();
 });
 
-module.exports = mongoose.model('Order', orderSchema);
+const Order = mongoose.model("Order", orderSchema);
+
+export default Order;

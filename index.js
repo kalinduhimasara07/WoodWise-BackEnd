@@ -6,9 +6,10 @@ import userRouter from "./routes/userRouter.js";
 import furnitureRouter from "./routes/furnitureRouter.js";
 import dotenv from "dotenv";
 import multer from "multer";
-import path from "path";  // Import path module
-import fs from "fs";      // Ensure fs is also imported
+import path from "path"; // Import path module
+import fs from "fs"; // Ensure fs is also imported
 import timberRouter from "./routes/timberRouter.js";
+import orderRouter from "./routes/orderRouter.js";
 
 dotenv.config();
 
@@ -18,7 +19,7 @@ const app = express();
 // Set up CORS (Cross-Origin Resource Sharing)
 app.use(
   cors({
-    origin: "http://localhost:5173",  // Your frontend URL
+    origin: "http://localhost:5173", // Your frontend URL
     credentials: true,
   })
 );
@@ -44,7 +45,7 @@ app.use("/uploads", express.static("uploads"));
 
 // Create directories if they do not exist
 const imageDir = "uploads/furniture-images";
-const modelDir = "uploads/furniture-models";  // Update this to "uploads/furniture-models"
+const modelDir = "uploads/furniture-models"; // Update this to "uploads/furniture-models"
 
 if (!fs.existsSync(imageDir)) fs.mkdirSync(imageDir, { recursive: true });
 if (!fs.existsSync(modelDir)) fs.mkdirSync(modelDir, { recursive: true });
@@ -55,7 +56,7 @@ const storage = multer.diskStorage({
     if (file.fieldname === "images") {
       cb(null, imageDir);
     } else if (file.fieldname === "models") {
-      cb(null, modelDir);  // Store models in "uploads/furniture-models"
+      cb(null, modelDir); // Store models in "uploads/furniture-models"
     } else {
       cb(new Error("Invalid file field name"), null);
     }
@@ -65,7 +66,7 @@ const storage = multer.diskStorage({
       Date.now() +
       "-" +
       Math.round(Math.random() * 1e9) +
-      path.extname(file.originalname);  // Use path.extname correctly to get file extension
+      path.extname(file.originalname); // Use path.extname correctly to get file extension
     cb(null, uniqueName);
   },
 });
@@ -73,7 +74,7 @@ const storage = multer.diskStorage({
 // Multer instance
 const upload = multer({
   storage,
-  limits: { fileSize: 20 * 1024 * 1024 },  // 20MB
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
 }).fields([
   { name: "images", maxCount: 10 },
   { name: "models", maxCount: 5 },
@@ -83,11 +84,13 @@ const upload = multer({
 app.use("/api/auth", userRouter);
 
 // Apply multer middleware to handle file uploads in the `furnitureRouter`
-app.post("/api/furniture/add-furniture", upload, furnitureRouter);  // Apply multer here
+app.post("/api/furniture/add-furniture", upload, furnitureRouter); // Apply multer here
 
 app.use("/api/furniture", furnitureRouter);
 
 app.use("/api/timber", timberRouter);
+
+app.use("/api/orders", orderRouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
