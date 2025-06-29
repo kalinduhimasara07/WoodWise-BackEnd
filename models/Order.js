@@ -35,6 +35,10 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  isPaymentCompleted: {
+    type: Boolean,
+    default: false,
+  },
   customerInfo: {
     name: { type: String, required: true },
     contactNumber: { type: String, required: true },
