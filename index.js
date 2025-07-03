@@ -10,6 +10,7 @@ import path from "path"; // Import path module
 import fs from "fs"; // Ensure fs is also imported
 import timberRouter from "./routes/timberRouter.js";
 import orderRouter from "./routes/orderRouter.js";
+import messageRouter from "./routes/messageRouter.js";
 
 dotenv.config();
 
@@ -91,6 +92,8 @@ app.use("/api/furniture", furnitureRouter);
 app.use("/api/timber", timberRouter);
 
 app.use("/api/orders", orderRouter);
+
+app.use("/api/messages", messageRouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

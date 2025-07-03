@@ -1,10 +1,6 @@
 import path from "path";
-import { fileURLToPath } from "url";
-import multer from "multer";
 import fs from "fs";
-import Furniture from "../models/furniture.js";
-
-
+import Furniture from "../models/Furniture.js";
 
 //handle adding furniture
 export async function addFurniture(req, res) {
@@ -101,7 +97,6 @@ export async function addFurniture(req, res) {
   }
 }
 
-
 export async function getAllFurniture(req, res) {
   try {
     const {
@@ -178,7 +173,6 @@ export async function getFurnitureById(req, res) {
     });
   }
 }
-
 
 // export async function updateFurniture(req, res) {
 //   try {
@@ -310,8 +304,6 @@ export async function getFurnitureById(req, res) {
 //     });
 //   }
 // }
-
-
 
 //Update furniture item
 export async function updateFurniture(req, res) {
