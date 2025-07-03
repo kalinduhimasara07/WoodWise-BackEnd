@@ -179,3 +179,40 @@ export async function changePaymentComplete(req, res) {
     });
   }
 }
+
+export async function updateOrder(req, res) {
+  try {
+    // Extract order number and updated data from the request body
+    const { orderNumber, updatedData } = req.body;
+    // Find the order by orderNumber
+    const order = await Order.findOne({ orderNumber });
+
+    // Check if the order exists
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: `Order with order number ${orderNumber} not found`,
+      });
+    }
+
+    // Update the order with the new data
+    Object.assign(order, updatedData);
+    order.updatedAt = Date.now(); // Update the timestamp to the current time
+
+    // Save the updated order to the database
+    await order.save();
+
+    // Send a success response
+    res.status(200).json({
+      success: true,
+      message: `Order ${orderNumber} updated successfully`,
+      data: order,
+    });
+  } catch (error) {
+    console.error("Error updating order:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
