@@ -4,6 +4,7 @@ import {
   changePaymentComplete,
   createOrder,
   getAllOrders,
+  sendOrderConfirmation,
   updateOrder,
 } from "../controllers/orderController.js";
 
@@ -14,5 +15,6 @@ orderRouter.get("/", getAllOrders);
 orderRouter.put("/status", changeOrderStatus);
 orderRouter.put("/payment-status", changePaymentComplete);
 orderRouter.put("/update", updateOrder);
+orderRouter.post("/send-sms", sendOrderConfirmation);
 
 export default orderRouter;

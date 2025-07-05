@@ -1,5 +1,6 @@
 import Order from "../models/Order.js";
 import nodemailer from "nodemailer"; // Import nodemailer
+import { Vonage } from '@vonage/server-sdk'
 
 export async function createOrder(req, res) {
   try {
@@ -413,5 +414,44 @@ export async function changeOrderStatus(req, res) {
       success: false,
       message: error.message,
     });
+  }
+}
+
+
+
+
+const vonage = new Vonage({
+  apiKey: process.env.VONAGE_API_KEY,
+  apiSecret: process.env.VONAGE_API_SECRET,
+})
+
+const from = process.env.VONAGE_FROM || "Vonage APIs"
+
+export async function sendOrderConfirmation(req, res) {
+  const { toPhoneNumber, orderId } = req.body
+
+  if (!toPhoneNumber || !orderId) {
+    return res.status(400).json({ success: false, message: 'Missing toPhoneNumber or orderId' })
+  }
+
+  const text = `Thank you! Your order ${orderId} has been received.`
+
+  try {
+    const response = await vonage.sms.send({ to: toPhoneNumber, from, text })
+    console.log('Message sent successfully')
+    console.log(response)
+
+    res.status(200).json({
+      success: true,
+      message: `SMS sent for order ${orderId}`,
+      data: response,
+    })
+  } catch (error) {
+    console.error('SMS Error:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send SMS',
+      error: error.message,
+    })
   }
 }
