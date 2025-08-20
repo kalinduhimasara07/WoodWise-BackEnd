@@ -1,6 +1,7 @@
+import axios from "axios";
 import Order from "../models/Order.js";
 import nodemailer from "nodemailer"; // Import nodemailer
-import { Vonage } from '@vonage/server-sdk'
+import { Vonage } from "@vonage/server-sdk";
 
 export async function createOrder(req, res) {
   try {
@@ -417,41 +418,44 @@ export async function changeOrderStatus(req, res) {
   }
 }
 
-
-
-
-const vonage = new Vonage({
-  apiKey: process.env.VONAGE_API_KEY,
-  apiSecret: process.env.VONAGE_API_SECRET,
-})
-
-const from = process.env.VONAGE_FROM || "Vonage APIs"
-
 export async function sendOrderConfirmation(req, res) {
-  const { toPhoneNumber, orderId } = req.body
+  const { toPhoneNumber, orderId } = req.body;
 
   if (!toPhoneNumber || !orderId) {
-    return res.status(400).json({ success: false, message: 'Missing toPhoneNumber or orderId' })
+    return res
+      .status(400)
+      .json({ success: false, message: "Missing toPhoneNumber or orderId" });
   }
 
-  const text = `Thank you! Your order ${orderId} has been received.`
+  const message = `Thank you! Your order ${orderId} has been received.`;
+
+  const apiUrl = "https://smslenz.lk/api/send-sms";
+
+  const params = {
+    user_id: process.env.SMSLENZ_USER_ID,
+    api_key: process.env.SMSLENZ_API_KEY,
+    sender_id: process.env.SMSLENZ_SENDER_ID,
+    contact: `${toPhoneNumber}`, // Make sure number is in E.164 with "+"
+    message,
+  };
 
   try {
-    const response = await vonage.sms.send({ to: toPhoneNumber, from, text })
-    console.log('Message sent successfully')
-    console.log(response)
+    const response = await axios.post(apiUrl, null, { params });
+
+    console.log("SMS API Response:", response.data);
 
     res.status(200).json({
       success: true,
-      message: `SMS sent for order ${orderId}`,
-      data: response,
-    })
+      message: `SMS sent to ${toPhoneNumber}`,
+      data: response.data,
+    });
   } catch (error) {
-    console.error('SMS Error:', error)
+    console.error("SMS sending failed:", error.response?.data || error.message);
+
     res.status(500).json({
       success: false,
-      message: 'Failed to send SMS',
-      error: error.message,
-    })
+      message: "Failed to send SMS",
+      error: error.response?.data || error.message,
+    });
   }
 }

@@ -11,6 +11,7 @@ import fs from "fs"; // Ensure fs is also imported
 import timberRouter from "./routes/timberRouter.js";
 import orderRouter from "./routes/orderRouter.js";
 import messageRouter from "./routes/messageRouter.js";
+import Jwt from "jsonwebtoken";
 
 dotenv.config();
 
@@ -27,6 +28,27 @@ app.use(
 
 // Middleware for parsing JSON and URL-encoded data
 app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+  const tokenString = req.header("Authorization");
+  if (tokenString != null) {
+    const token = tokenString.replace("Bearer ", "");
+    Jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (decoded != null) {
+        console.log(decoded);
+        req.user = decoded; //attach the user object to the request
+        next();
+      } else {
+        console.log("invalid token");
+        res.status(403).json({ error: "Invalid token" });
+      }
+    });
+    console.log(token);
+  } else {
+    next();
+  }
+});
+
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
