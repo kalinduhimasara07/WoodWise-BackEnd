@@ -12,6 +12,7 @@ import timberRouter from "./routes/timberRouter.js";
 import orderRouter from "./routes/orderRouter.js";
 import messageRouter from "./routes/messageRouter.js";
 import Jwt from "jsonwebtoken";
+import supplierRouter from "./routes/supplierRouter.js";
 
 dotenv.config();
 
@@ -116,6 +117,8 @@ app.use("/api/timber", timberRouter);
 app.use("/api/orders", orderRouter);
 
 app.use("/api/messages", messageRouter);
+
+app.use("/api/suppliers", supplierRouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
