@@ -15,6 +15,8 @@ export async function createOrder(req, res) {
       status,
       millWorker,
       notes,
+      isCustom,
+      customImage,
     } = req.body;
 
     // Generate a unique order number
@@ -28,6 +30,12 @@ export async function createOrder(req, res) {
       orderNumber = `ORD${(lastOrderNumber + 1).toString().padStart(3, "0")}`;
     }
 
+    const customFlag = isCustom === true || isCustom === "true";
+    let uploadedImageUrl = "";
+    if (customFlag && customImage) {
+      uploadedImageUrl = customImage;
+    }
+
     // Create a new order instance
     const newOrder = new Order({
       orderNumber,
@@ -39,6 +47,8 @@ export async function createOrder(req, res) {
       status: status || "Pending", // Default value if not provided
       millWorker: millWorker || "Not Assigned", // Default value if not provided
       notes: notes || "No additional notes", // Default value if not provided
+      isCustom: customFlag,
+      customImage: uploadedImageUrl,
     });
 
     // Save the new order to the database

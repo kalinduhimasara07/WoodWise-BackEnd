@@ -68,6 +68,14 @@ const orderSchema = new mongoose.Schema({
     type: String,
     default: "No additional notes",
   },
+  isCustom: {
+    type: Boolean,
+    default: false,
+  },
+  customImage: {
+    type: String,
+    default: "",
+  },
   createdAt: {
     type: Date,
     default: Date.now,
