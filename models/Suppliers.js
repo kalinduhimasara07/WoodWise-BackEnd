@@ -35,74 +35,11 @@ const supplierSchema = new mongoose.Schema({
     postalCode: { type: String },
   },
 
-  // Supplied timbers list
-  supplies: [
-    {
-      timberCategory: {
-        type: String,
-        enum: [
-          "Teak",
-          "Oak",
-          "Mahogany",
-          "Pine",
-          "Walnut",
-          "Bamboo",
-          "Ash",
-          "Rosewood",
-          "Rubberwood",
-          "Bodhi",
-          "Mango",
-          "Yaka",
-          "Halmilla",
-          "Vatica",
-          "Rambutan",
-          "Kumbuk",
-          "Balan",
-          "Dumbara",
-          "Hedar",
-          "Sassafras",
-          "Kachchan",
-          "Millettia",
-          "Koss",
-          "Lunumidella",
-          "Kandula",
-          "Berrya",
-          "Cinnamon",
-          "Ruhuna",
-        ],
-        required: true,
-      },
-      grade: {
-        type: String,
-        enum: ["Premium", "Standard", "Economy"],
-        default: "Standard",
-      },
-      pricePerUnit: {
-        type: Number,
-        required: true,
-        min: 0,
-      },
-      stockAvailable: {
-        type: Number,
-        min: 0,
-        default: 0,
-      },
-      description: {
-        type: String,
-        trim: true,
-      },
-      lastUpdated: {
-        type: Date,
-        default: Date.now,
-      },
-    },
-  ],
-
   rating: {
     type: Number,
     min: 1,
     max: 5,
-    default: 3,
+    default: 1,
   },
   active: {
     type: Boolean,

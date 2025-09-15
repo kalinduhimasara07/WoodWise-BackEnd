@@ -1,8 +1,7 @@
-import Supplier from "../models/Suppliers.js"; // adjust the path if needed
+import Supplier from "../models/Suppliers.js";
 
 export async function addSupplier(req, res) {
   try {
-    // Extract supplier data from request body
     const {
       name,
       companyName,
@@ -10,12 +9,10 @@ export async function addSupplier(req, res) {
       contactNumber,
       email,
       address,
-      supplies, // array of supplied timbers
       rating,
       active,
     } = req.body;
 
-    // Create a new Supplier document
     const supplier = new Supplier({
       name,
       companyName,
@@ -23,12 +20,10 @@ export async function addSupplier(req, res) {
       contactNumber,
       email,
       address,
-      supplies,  // [{ timberCategory, grade, pricePerUnit, stockAvailable, description }]
       rating,
       active,
     });
 
-    // Save supplier to DB
     await supplier.save();
 
     res.status(201).json({
