@@ -36,7 +36,7 @@ app.use((req, res, next) => {
     const token = tokenString.replace("Bearer ", "");
     Jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (decoded != null) {
-        console.log(decoded);
+        // console.log(decoded);
         req.user = decoded; //attach the user object to the request
         next();
       } else {
@@ -44,7 +44,7 @@ app.use((req, res, next) => {
         res.status(403).json({ error: "Invalid token" });
       }
     });
-    console.log(token);
+    // console.log(token);
   } else {
     next();
   }
