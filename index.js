@@ -6,8 +6,8 @@ import userRouter from "./routes/userRouter.js";
 import furnitureRouter from "./routes/furnitureRouter.js";
 import dotenv from "dotenv";
 import multer from "multer";
-import path from "path"; // Import path module
-import fs from "fs"; // Ensure fs is also imported
+import path from "path";
+import fs from "fs";
 import timberRouter from "./routes/timberRouter.js";
 import orderRouter from "./routes/orderRouter.js";
 import messageRouter from "./routes/messageRouter.js";
@@ -16,18 +16,15 @@ import supplierRouter from "./routes/supplierRouter.js";
 
 dotenv.config();
 
-// Initialize Express app
 const app = express();
 
-// Set up CORS (Cross-Origin Resource Sharing)
 app.use(
   cors({
-    origin: "http://localhost:5173", // Your frontend URL
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );
 
-// Middleware for parsing JSON and URL-encoded data
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
@@ -37,7 +34,7 @@ app.use((req, res, next) => {
     Jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (decoded != null) {
         // console.log(decoded);
-        req.user = decoded; //attach the user object to the request
+        req.user = decoded;
         next();
       } else {
         console.log("invalid token");
@@ -64,23 +61,20 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-// Serve static files (e.g., images, models)
 app.use("/uploads", express.static("uploads"));
 
-// Create directories if they do not exist
 const imageDir = "uploads/furniture-images";
-const modelDir = "uploads/furniture-models"; // Update this to "uploads/furniture-models"
+const modelDir = "uploads/furniture-models";
 
 if (!fs.existsSync(imageDir)) fs.mkdirSync(imageDir, { recursive: true });
 if (!fs.existsSync(modelDir)) fs.mkdirSync(modelDir, { recursive: true });
 
-// Set up multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     if (file.fieldname === "images") {
       cb(null, imageDir);
     } else if (file.fieldname === "models") {
-      cb(null, modelDir); // Store models in "uploads/furniture-models"
+      cb(null, modelDir);
     } else {
       cb(new Error("Invalid file field name"), null);
     }
@@ -90,12 +84,11 @@ const storage = multer.diskStorage({
       Date.now() +
       "-" +
       Math.round(Math.random() * 1e9) +
-      path.extname(file.originalname); // Use path.extname correctly to get file extension
+      path.extname(file.originalname);
     cb(null, uniqueName);
   },
 });
 
-// Multer instance
 const upload = multer({
   storage,
   limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
@@ -104,11 +97,9 @@ const upload = multer({
   { name: "models", maxCount: 5 },
 ]);
 
-// Use routes with multer middleware for file uploads
 app.use("/api/auth", userRouter);
 
-// Apply multer middleware to handle file uploads in the `furnitureRouter`
-app.post("/api/furniture/add-furniture", upload, furnitureRouter); // Apply multer here
+app.post("/api/furniture/add-furniture", upload, furnitureRouter);
 
 app.use("/api/furniture", furnitureRouter);
 

@@ -44,7 +44,6 @@ export async function addSupplier(req, res) {
 // Get all suppliers
 export async function getAllSuppliers(req, res) {
   try {
-    // Fetch all suppliers (you can also add filters later if needed)
     const suppliers = await Supplier.find();
 
     res.status(200).json({

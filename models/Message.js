@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema({
   senderId: {
-    type: String, // ID of the sender (can be admin, store staff, or mill staff)
+    type: String,
     required: true,
   },
   message: {
@@ -15,7 +15,7 @@ const messageSchema = new mongoose.Schema({
   },
   readers: [
     {
-      type: String, // List of user IDs who have read the message
+      type: String,
     },
   ],
   status: {
