@@ -282,10 +282,12 @@ export async function changeOrderStatus(req, res) {
     const itemsHtml = order.furnitureItems
       .map(
         (item) => `
-      <tr style="border-bottom: 1px solid #ddd;">
-        <td style="padding: 10px;">${item.sku}</td>
-        <td style="padding: 10px; text-align: center;">${item.quantity}</td>
-        <td style="padding: 10px; text-align: right;">$${item.unitPrice.toFixed(
+      <tr style="border-bottom: 1px solid #eeeeee;">
+        <td style="padding: 12px 15px; color: #555555;">${item.sku}</td>
+        <td style="padding: 12px 15px; text-align: center; color: #555555;">${
+          item.quantity
+        }</td>
+        <td style="padding: 12px 15px; text-align: right; color: #555555;">LKR ${item.unitPrice.toFixed(
           2
         )}</td>
       </tr>
@@ -305,44 +307,42 @@ export async function changeOrderStatus(req, res) {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Order Status Update</title>
           <style>
-              @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Lato:wght@400;700&display=swap');
+              @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
           </style>
       </head>
-      <body style="margin: 0; padding: 0; background-color: #F9F7F6; font-family: 'Lato', Arial, sans-serif;">
-          <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; margin-top: 20px; margin-bottom: 20px;">
+      <body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: 'Poppins', Arial, sans-serif;">
+          <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; margin: 20px auto; border: 1px solid #dddddd;">
               <tr>
-                  <td align="center" style="background-color: #5D4037; padding: 30px 0;">
-                      <h1 style="color: #FFFFFF; font-family: 'Merriweather', serif; margin: 0; font-size: 36px;">WoodWise</h1>
-                      <p style="color: #EFEBE9; font-family: 'Lato', sans-serif; font-size: 16px; margin-top: 5px;">Crafting Your Comfort</p>
+                  <td align="center" style="background-color: #2c3e50; padding: 25px 0;">
+                      <h1 style="color: #ffffff; font-family: 'Poppins', sans-serif; margin: 0; font-size: 32px; font-weight: 700;">WoodWise</h1>
+                      <p style="color: #bdc3c7; font-family: 'Poppins', sans-serif; font-size: 14px; margin-top: 4px;">Crafting Your Comfort</p>
                   </td>
               </tr>
               <tr>
                   <td bgcolor="#ffffff" style="padding: 40px 30px;">
-                      <h2 style="font-family: 'Merriweather', serif; color: #3E2723;">Hello ${
+                      <h2 style="font-family: 'Poppins', sans-serif; color: #2c3e50; font-weight: 600; margin-top: 0;">Hi ${
                         order.customerInfo.name
                       },</h2>
-                      <p style="font-size: 16px; color: #5f5f5f; line-height: 1.5;">
-                          We have an update regarding your order. The status for your order <strong>#${orderNumber}</strong> is now:
+                      <p style="font-size: 16px; color: #555555; line-height: 1.6;">
+                          This is an update on your recent order. The status for your order <strong>#${orderNumber}</strong> has been updated to:
                       </p>
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 25px 0;">
                           <tr>
-                              <td align="center" style="background-color: #A1887F; border-radius: 5px; padding: 15px;">
-                                  <span style="font-size: 22px; font-weight: bold; color: #FFFFFF; font-family: 'Merriweather', serif;">
+                              <td align="center" style="background-color: #3498db; border-radius: 5px; padding: 15px;">
+                                  <span style="font-size: 20px; font-weight: 600; color: #ffffff; font-family: 'Poppins', sans-serif; text-transform: uppercase; letter-spacing: 1px;">
                                       ${newStatus}
                                   </span>
                               </td>
                           </tr>
                       </table>
                       
-                      <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
-
-                      <h3 style="font-family: 'Merriweather', serif; color: #3E2723; border-bottom: 2px solid #5D4037; padding-bottom: 5px;">Order Summary</h3>
-                      <table width="100%" style="border-collapse: collapse; font-size: 14px; color: #333;">
+                      <h3 style="font-family: 'Poppins', sans-serif; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #f4f4f4; padding-bottom: 10px; margin-top: 30px; margin-bottom: 20px;">Order Summary</h3>
+                      <table width="100%" style="border-collapse: collapse; font-size: 14px; color: #333333;">
                           <thead>
-                              <tr style="background-color: #F5F5F5;">
-                                  <th style="padding: 10px; text-align: left;">Item</th>
-                                  <th style="padding: 10px; text-align: center;">Quantity</th>
-                                  <th style="padding: 10px; text-align: right;">Price</th>
+                              <tr style="background-color: #f8f8f8;">
+                                  <th style="padding: 12px 15px; text-align: left; font-weight: 600;">Item</th>
+                                  <th style="padding: 12px 15px; text-align: center; font-weight: 600;">Quantity</th>
+                                  <th style="padding: 12px 15px; text-align: right; font-weight: 600;">Price</th>
                               </tr>
                           </thead>
                           <tbody>
@@ -350,48 +350,50 @@ export async function changeOrderStatus(req, res) {
                           </tbody>
                       </table>
                       <table width="100%" style="border-collapse: collapse; font-size: 16px; margin-top: 20px;">
-                          <tr>
-                              <td style="text-align: right; padding: 5px; font-weight: bold;">Total Amount:</td>
-                              <td style="text-align: right; padding: 5px; width: 100px;">$${order.totalAmount.toFixed(
-                                2
-                              )}</td>
-                          </tr>
-                          <tr>
-                              <td style="text-align: right; padding: 5px; font-weight: bold;">Advance Paid:</td>
-                              <td style="text-align: right; padding: 5px; width: 100px;">$${order.advanceAmount.toFixed(
-                                2
-                              )}</td>
-                          </tr>
-                           <tr style="font-weight: bold; color: #5D4037;">
-                              <td style="text-align: right; padding: 5px; border-top: 2px solid #ddd;">Balance Due:</td>
-                              <td style="text-align: right; padding: 5px; width: 100px; border-top: 2px solid #ddd;">$${(
-                                order.totalAmount - order.advanceAmount
-                              ).toFixed(2)}</td>
-                          </tr>
-                      </table>
-                      
-                      <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
-                      
-                      <h3 style="font-family: 'Merriweather', serif; color: #3E2723; border-bottom: 2px solid #5D4037; padding-bottom: 5px;">Customer Details</h3>
-                      <table width="100%" style="font-size: 14px; line-height: 1.6; color: #5f5f5f;">
-                          <tr>
-                              <td style="font-weight: bold; width: 150px;">Shipping Address:</td>
-                              <td>${order.customerInfo.address}</td>
-                          </tr>
                            <tr>
-                              <td style="font-weight: bold;">Contact Number:</td>
-                              <td>${order.customerInfo.contactNumber}</td>
+                                <td style="text-align: right; padding: 5px 0; font-weight: 600; color: #555;">Total Amount:</td>
+                                <td style="text-align: right; padding: 5px 0; width: 120px;">LKR ${order.totalAmount.toFixed(
+                                  2
+                                )}</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: right; padding: 5px 0; font-weight: 600; color: #555;">Advance Paid:</td>
+                                <td style="text-align: right; padding: 5px 0; width: 120px;">LKR ${order.advanceAmount.toFixed(
+                                  2
+                                )}</td>
+                            </tr>
+                            <tr style="font-weight: 700; color: #3498db;">
+                                <td style="text-align: right; padding: 8px 0; border-top: 2px solid #eeeeee;">Balance Due:</td>
+                                <td style="text-align: right; padding: 8px 0; width: 120px; border-top: 2px solid #eeeeee;">LKR ${(
+                                  order.totalAmount - order.advanceAmount
+                                ).toFixed(2)}</td>
+                            </tr>
+                      </table>
+                      
+                      <h3 style="font-family: 'Poppins', sans-serif; color: #2c3e50; font-weight: 600; border-bottom: 2px solid #f4f4f4; padding-bottom: 10px; margin-top: 30px; margin-bottom: 20px;">Customer Details</h3>
+                      <table width="100%" style="font-size: 14px; line-height: 1.8; color: #555555;">
+                          <tr>
+                              <td style="font-weight: 600; width: 150px; padding: 4px 0;">Shipping Address:</td>
+                              <td style="padding: 4px 0;">${
+                                order.customerInfo.address
+                              }</td>
+                          </tr>
+                             <tr>
+                              <td style="font-weight: 600; padding: 4px 0;">Contact Number:</td>
+                              <td style="padding: 4px 0;">${
+                                order.customerInfo.contactNumber
+                              }</td>
                           </tr>
                       </table>
                       
-                      <p style="font-size: 16px; color: #5f5f5f; line-height: 1.5; margin-top: 30px;">
-                          Thank you for choosing WoodWise. We appreciate your business and are working diligently on your order.
+                      <p style="font-size: 16px; color: #555555; line-height: 1.6; margin-top: 40px;">
+                          Thank you for choosing WoodWise. We appreciate your business!
                       </p>
                   </td>
               </tr>
               <tr>
-                  <td bgcolor="#5D4037" style="padding: 20px 30px;" align="center">
-                      <p style="margin: 0; color: #EFEBE9; font-size: 12px;">
+                  <td bgcolor="#2c3e50" style="padding: 20px 30px;" align="center">
+                      <p style="margin: 0; color: #bdc3c7; font-size: 12px; line-height: 1.5;">
                           &copy; ${new Date().getFullYear()} WoodWise. All rights reserved.<br>
                           This is an automated notification. Please do not reply to this email.
                       </p>
@@ -428,8 +430,58 @@ export async function changeOrderStatus(req, res) {
   }
 }
 
+// export async function sendOrderConfirmation(req, res) {
+//   const { toPhoneNumber, orderId } = req.body;
+
+//   if (!toPhoneNumber || !orderId) {
+//     return res
+//       .status(400)
+//       .json({ success: false, message: "Missing toPhoneNumber or orderId" });
+//   }
+
+//   const message = `Thank you! Your order ${orderId} has been received.`;
+
+//   const apiUrl = "https://smslenz.lk/api/send-sms";
+
+//   const params = {
+//     user_id: process.env.SMSLENZ_USER_ID,
+//     api_key: process.env.SMSLENZ_API_KEY,
+//     sender_id: process.env.SMSLENZ_SENDER_ID,
+//     contact: `${toPhoneNumber}`, // Make sure number is in E.164 with "+"
+//     message,
+//   };
+
+//   try {
+//     const response = await axios.post(apiUrl, null, { params });
+
+//     console.log("SMS API Response:", response.data);
+
+//     res.status(200).json({
+//       success: true,
+//       message: `SMS sent to ${toPhoneNumber}`,
+//       data: response.data,
+//     });
+//   } catch (error) {
+//     console.error("SMS sending failed:", error.response?.data || error.message);
+
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to send SMS",
+//       error: error.response?.data || error.message,
+//     });
+//   }
+// }
+
 export async function sendOrderConfirmation(req, res) {
-  const { toPhoneNumber, orderId } = req.body;
+  const {
+    toPhoneNumber,
+    orderId,
+    orderStatus,
+    customerName,
+    totalAmount,
+    advanceAmount,
+    balanceAmount,
+  } = req.body;
 
   if (!toPhoneNumber || !orderId) {
     return res
@@ -437,7 +489,29 @@ export async function sendOrderConfirmation(req, res) {
       .json({ success: false, message: "Missing toPhoneNumber or orderId" });
   }
 
-  const message = `Thank you! Your order ${orderId} has been received.`;
+  // --- Phone Number Parser ---
+  const formatPhoneNumber = (number) => {
+    let cleaned = number.replace(/\D/g, ""); // remove non-digits
+
+    // If number starts with 0, replace with +94
+    if (cleaned.startsWith("0")) {
+      cleaned = "+94" + cleaned.substring(1);
+    }
+    // If number already starts with 94 (no +), add +
+    else if (cleaned.startsWith("94")) {
+      cleaned = "+" + cleaned;
+    }
+    // If number starts with 7 (like 761231234), add +94
+    else if (cleaned.startsWith("7")) {
+      cleaned = "+94" + cleaned;
+    }
+
+    return cleaned;
+  };
+
+  const formattedNumber = formatPhoneNumber(toPhoneNumber);
+
+  const message = `Dear ${customerName}, Your order ${orderId} has been ${orderStatus}. Total amount: ${totalAmount}, Advance amount: ${advanceAmount}, Balance amount: ${balanceAmount}.Thank you for shopping with us!`;
 
   const apiUrl = "https://smslenz.lk/api/send-sms";
 
@@ -445,7 +519,7 @@ export async function sendOrderConfirmation(req, res) {
     user_id: process.env.SMSLENZ_USER_ID,
     api_key: process.env.SMSLENZ_API_KEY,
     sender_id: process.env.SMSLENZ_SENDER_ID,
-    contact: `${toPhoneNumber}`, // Make sure number is in E.164 with "+"
+    contact: formattedNumber, // Always E.164 format
     message,
   };
 
@@ -456,7 +530,7 @@ export async function sendOrderConfirmation(req, res) {
 
     res.status(200).json({
       success: true,
-      message: `SMS sent to ${toPhoneNumber}`,
+      message: `SMS sent to ${formattedNumber}`,
       data: response.data,
     });
   } catch (error) {
