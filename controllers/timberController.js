@@ -2,7 +2,6 @@ import Timber from "../models/Timber.js";
 
 export async function addTimber(req, res) {
   try {
-    // Extract timber data from the request body
     const {
       category,
       grade,
@@ -13,7 +12,6 @@ export async function addTimber(req, res) {
       sku,
     } = req.body;
 
-    // Create a new Timber document with the provided data
     const timber = new Timber({
       category,
       grade,
@@ -24,7 +22,6 @@ export async function addTimber(req, res) {
       sku,
     });
 
-    // Save the new timber item to the database
     await timber.save();
 
     res.status(201).json({
@@ -43,7 +40,6 @@ export async function addTimber(req, res) {
 
 export async function getAllTimber(req, res) {
   try {
-    // Retrieve all timber items from the database
     const timbers = await Timber.find();
 
     if (timbers.length === 0) {
@@ -53,7 +49,6 @@ export async function getAllTimber(req, res) {
       });
     }
 
-    // Send the list of timbers in the response
     res.json({
       success: true,
       message: "Timber items retrieved successfully",
@@ -70,13 +65,11 @@ export async function getAllTimber(req, res) {
 
 export async function updateTimber(req, res) {
   try {
-    const timberId = req.params.id; // Get the timber ID from the request parameters
-    const updateData = req.body; // Get the data to update from the request body
+    const timberId = req.params.id;
+    const updateData = req.body;
 
-    // Find the timber item by its ID
     const timber = await Timber.findById(timberId);
 
-    // If the timber item does not exist, return a 404 error
     if (!timber) {
       return res.status(404).json({
         success: false,
@@ -84,13 +77,11 @@ export async function updateTimber(req, res) {
       });
     }
 
-    // Update the timber item with the new data
     const updatedTimber = await Timber.findByIdAndUpdate(timberId, updateData, {
-      new: true, // Return the updated document
-      runValidators: true, // Run validation before saving the document
+      new: true,
+      runValidators: true,
     });
 
-    // Return a success response with the updated timber item
     res.json({
       success: true,
       message: "Timber item updated successfully",
@@ -108,12 +99,10 @@ export async function updateTimber(req, res) {
 
 export async function deleteTimber(req, res) {
   try {
-    const timberId = req.params.id; // Get the timber ID from the request parameters
+    const timberId = req.params.id;
 
-    // Find the timber item by its ID
     const timber = await Timber.findById(timberId);
 
-    // If the timber item does not exist, return a 404 error
     if (!timber) {
       return res.status(404).json({
         success: false,
@@ -121,10 +110,8 @@ export async function deleteTimber(req, res) {
       });
     }
 
-    // Delete the timber item
     await Timber.findByIdAndDelete(timberId);
 
-    // Return a success response
     res.json({
       success: true,
       message: "Timber item deleted successfully",

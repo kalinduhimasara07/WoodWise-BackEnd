@@ -155,13 +155,10 @@ export async function getAllOrders(req, res) {
 
 export async function changePaymentComplete(req, res) {
   try {
-    // Extract order number from the request body
     const { orderNumber } = req.body;
 
-    // Find the order by orderNumber
     const order = await Order.findOne({ orderNumber });
 
-    // Check if the order exists
     if (!order) {
       return res.status(404).json({
         success: false,
@@ -169,14 +166,11 @@ export async function changePaymentComplete(req, res) {
       });
     }
 
-    // Toggle the isPaymentCompleted field
     order.isPaymentCompleted = !order.isPaymentCompleted;
-    order.updatedAt = Date.now(); // Update the timestamp to the current time
+    order.updatedAt = Date.now();
 
-    // Save the updated order to the database
     await order.save();
 
-    // Send a success response
     res.status(200).json({
       success: true,
       message: `Payment status for order ${orderNumber} updated to '${
@@ -195,12 +189,9 @@ export async function changePaymentComplete(req, res) {
 
 export async function updateOrder(req, res) {
   try {
-    // Extract order number and updated data from the request body
     const { orderNumber, updatedData } = req.body;
-    // Find the order by orderNumber
     const order = await Order.findOne({ orderNumber });
 
-    // Check if the order exists
     if (!order) {
       return res.status(404).json({
         success: false,
@@ -208,14 +199,11 @@ export async function updateOrder(req, res) {
       });
     }
 
-    // Update the order with the new data
     Object.assign(order, updatedData);
-    order.updatedAt = Date.now(); // Update the timestamp to the current time
+    order.updatedAt = Date.now();
 
-    // Save the updated order to the database
     await order.save();
 
-    // Send a success response
     res.status(200).json({
       success: true,
       message: `Order ${orderNumber} updated successfully`,
@@ -230,7 +218,6 @@ export async function updateOrder(req, res) {
   }
 }
 
-// Create a transporter object using your existing configuration
 const transport = nodemailer.createTransport({
   service: "gmail",
   host: "smtp.gmail.com",

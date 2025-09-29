@@ -5,8 +5,8 @@ import Furniture from "../models/Furniture.js";
 //handle adding furniture
 export async function addFurniture(req, res) {
   try {
-    console.log("Request Body:", req.body); // For debugging purposes
-    console.log("Files:", req.files); // Check the files uploaded
+    console.log("Request Body:", req.body);
+    console.log("Files:", req.files);
 
     const {
       name,
@@ -46,17 +46,17 @@ export async function addFurniture(req, res) {
 
     // Handle images - Ensure images is an array before processing
     const imageData = Array.isArray(req.body.images)
-      ? req.body.images.map((url) => ({ url })) // Directly store the URL if it's an array
+      ? req.body.images.map((url) => ({ url }))
       : req.body.images
-      ? [{ url: req.body.images }] // If it's a string, wrap it in an array
+      ? [{ url: req.body.images }]
       : [];
 
     // Handle models - Ensure it's an array before processing
     const modelData = req.body.models
-      ? Array.isArray(req.body.models) // Check if it's already an array
-        ? req.body.models.map((url) => ({ url })) // Directly map if it's an array
-        : [{ url: req.body.models }] // If it's a string, wrap it in an array
-      : []; // If there's no models field, set it to an empty array
+      ? Array.isArray(req.body.models)
+        ? req.body.models.map((url) => ({ url }))
+        : [{ url: req.body.models }] 
+      : [];
 
     // Create the new furniture item
     const furniture = new Furniture({
@@ -74,8 +74,8 @@ export async function addFurniture(req, res) {
       stock: parseInt(stock),
       sku: sku.trim(),
       tags: parsedTags,
-      images: imageData, // Saving image URLs
-      models: modelData, // Saving model URLs
+      images: imageData,
+      models: modelData,
       inStock: inStock === "true" || inStock === true,
       featured: featured === "true" || featured === true,
     });
@@ -174,138 +174,6 @@ export async function getFurnitureById(req, res) {
   }
 }
 
-// export async function updateFurniture(req, res) {
-//   try {
-//     const furniture = await Furniture.findById(req.params.id);
-//     if (!furniture) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Furniture item not found",
-//       });
-//     }
-
-//     // Parse dimensions
-//     let parsedDimensions = req.body.dimensions;
-//     if (typeof parsedDimensions === "string") {
-//       try {
-//         parsedDimensions = JSON.parse(parsedDimensions);
-//       } catch (error) {
-//         console.error("Error parsing dimensions:", error);
-//         parsedDimensions = furniture.dimensions;
-//       }
-//     }
-
-//     // Parse tags
-//     let parsedTags = req.body.tags;
-//     if (typeof parsedTags === "string") {
-//       try {
-//         parsedTags = JSON.parse(parsedTags);
-//       } catch (error) {
-//         console.error("Error parsing tags:", error);
-//         parsedTags = furniture.tags;
-//       }
-//     }
-
-//     // Images and Models from req.files (from .fields())
-//     const newImages =
-//       req.files?.images?.map((file) => ({
-//         filename: file.filename,
-//         originalName: file.originalname,
-//         path: file.path,
-//         size: file.size,
-//         mimetype: file.mimetype,
-//       })) || [];
-
-//     const newModels =
-//       req.files?.models?.map((file) => ({
-//         filename: file.filename,
-//         originalName: file.originalname,
-//         path: file.path,
-//         size: file.size,
-//         mimetype: file.mimetype,
-//       })) || [];
-
-//     const updateData = {
-//       name: req.body.name ? req.body.name.trim() : furniture.name,
-//       category: req.body.category || furniture.category,
-//       subcategory: req.body.subcategory ?? furniture.subcategory,
-//       description: req.body.description
-//         ? req.body.description.trim()
-//         : furniture.description,
-//       woodType: req.body.woodType || furniture.woodType,
-//       dimensions: parsedDimensions || furniture.dimensions,
-//       tags: parsedTags || furniture.tags,
-//       price: req.body.price ? parseFloat(req.body.price) : furniture.price,
-//       salePrice:
-//         req.body.salePrice !== undefined
-//           ? req.body.salePrice
-//             ? parseFloat(req.body.salePrice)
-//             : null
-//           : furniture.salePrice,
-//       stock:
-//         req.body.stock !== undefined
-//           ? parseInt(req.body.stock)
-//           : furniture.stock,
-//       weight:
-//         req.body.weight !== undefined
-//           ? req.body.weight
-//             ? parseFloat(req.body.weight)
-//             : null
-//           : furniture.weight,
-//       color: req.body.color ?? furniture.color,
-//       brand: req.body.brand ?? furniture.brand,
-//       sku: req.body.sku ? req.body.sku.trim() : furniture.sku,
-//       inStock:
-//         req.body.inStock !== undefined
-//           ? req.body.inStock === "true" || req.body.inStock === true
-//           : furniture.inStock,
-//       featured:
-//         req.body.featured !== undefined
-//           ? req.body.featured === "true" || req.body.featured === true
-//           : furniture.featured,
-//     };
-
-//     if (newImages.length > 0) {
-//       updateData.images = [...(furniture.images || []), ...newImages];
-//     }
-
-//     if (newModels.length > 0) {
-//       updateData.models = [...(furniture.models || []), ...newModels];
-//     }
-
-//     const updatedFurniture = await Furniture.findByIdAndUpdate(
-//       req.params.id,
-//       updateData,
-//       { new: true, runValidators: true }
-//     );
-
-//     res.json({
-//       success: true,
-//       message: "Furniture item updated successfully",
-//       data: updatedFurniture,
-//     });
-//   } catch (error) {
-//     console.error("Error updating furniture:", error);
-
-//     // Delete any uploaded files if error occurs
-//     if (req.files) {
-//       Object.values(req.files)
-//         .flat()
-//         .forEach((file) => {
-//           fs.unlink(file.path, (err) => {
-//             if (err) console.error("Error deleting file:", err);
-//           });
-//         });
-//     }
-
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// }
-
-//Update furniture item
 export async function updateFurniture(req, res) {
   try {
     const furniture = await Furniture.findOne({ sku: req.params.id });
@@ -317,7 +185,6 @@ export async function updateFurniture(req, res) {
       });
     }
 
-    // Handle update logic for the furniture item
     const updatedFurniture = await Furniture.findOneAndUpdate(
       { sku: req.params.id },
       {
@@ -355,7 +222,7 @@ export async function updateFurniture(req, res) {
         sku: req.body.sku || furniture.sku,
         inStock: req.body.inStock || furniture.inStock,
         featured: req.body.featured || furniture.featured,
-        updatedAt: Date.now(), // Manually update the `updatedAt` field
+        updatedAt: Date.now(),
       },
       { new: true, runValidators: true }
     );
