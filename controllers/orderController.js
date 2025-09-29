@@ -498,7 +498,7 @@ export async function sendOrderConfirmation(req, res) {
 
   const formattedNumber = formatPhoneNumber(toPhoneNumber);
 
-  const message = `Dear ${customerName}, Your order ${orderId} has been ${orderStatus}. Total amount: ${totalAmount}, Advance amount: ${advanceAmount}, Balance amount: ${balanceAmount}.Thank you for shopping with us!`;
+  const message = `Dear ${customerName}, Your order ${orderId} has been ${orderStatus}. Total amount: ${totalAmount}, Advance amount: ${advanceAmount}, Balance amount: ${balanceAmount}. Thank you for shopping with us!`;
 
   const apiUrl = "https://smslenz.lk/api/send-sms";
 
