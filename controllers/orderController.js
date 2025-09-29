@@ -543,3 +543,40 @@ export async function sendOrderConfirmation(req, res) {
     });
   }
 }
+
+//change mill worker in order
+export async function changeMillWorker(req, res) {
+  const { orderNumber, millWorker } = req.body;
+
+  if (!orderNumber || !millWorker) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Missing orderNumber or millWorker" });
+  }
+
+  try {
+    const order = await Order.findOne({ orderNumber });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: `Order with order number ${orderNumber} not found`,
+      });
+    }
+
+    order.millWorker = millWorker;
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Mill worker for order ${orderNumber} updated successfully`,
+      data: order,
+    });
+  } catch (error) {
+    console.error("Error changing mill worker:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}

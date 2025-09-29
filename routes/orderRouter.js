@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  changeMillWorker,
   changeOrderStatus,
   changePaymentComplete,
   createOrder,
@@ -15,6 +16,7 @@ orderRouter.get("/", getAllOrders);
 orderRouter.put("/status", changeOrderStatus);
 orderRouter.put("/payment-status", changePaymentComplete);
 orderRouter.put("/update", updateOrder);
+orderRouter.put("/change-mill-worker", changeMillWorker);
 orderRouter.post("/send-sms", sendOrderConfirmation);
 
 export default orderRouter;
