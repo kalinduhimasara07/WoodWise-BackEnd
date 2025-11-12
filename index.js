@@ -20,7 +20,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://wood-wise-xi.vercel.app/",
     credentials: true,
   })
 );
