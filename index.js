@@ -18,12 +18,7 @@ dotenv.config();
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "https://wood-wise-xi.vercel.app/",
-    credentials: true,
-  })
-);
+app.use(cors());
 
 app.use(bodyParser.json());
 
